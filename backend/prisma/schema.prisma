@@ -1,0 +1,89 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+//O PRISMA E UMA EXTENSAO QUE AJUDA A CRIAR O BANDO DE DADOS PELO CMD
+//ELE FAZ TUDO MAIS RAPIDO POR LINHA DE CODIGOS, ELE FOI BAIXADO PELO CMD TBM
+//CONECTAMOS ELE COM O BEEKEEPEER, Beekeeper Studio é um editor e gerenciador SQL de banco de dados multiplataforma
+//O BEEKEEPER CONECTOU COM O PGADMIN, NAO USAMOS ELE PQ É MAIS FEIO
+//POST BIRD
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User{
+  id String @id @default(uuid())
+  name String
+  email String
+  password String
+  created_at DateTime? @default(now())
+  updated_at DateTime? @default(now())
+
+  ///nome da tabela
+  @@map("users")
+}
+model Category{
+  id String @id @default(uuid())
+  name String
+  created_at DateTime? @default(now())
+  updated_at DateTime? @default(now())
+
+  //nome da tabela
+  @@map("categories")
+  //fazendo a relação, uma category pode ser any produtcs dentro
+  products Product[]
+}
+model Product{
+  id String @id @default(uuid())
+  name String
+  price String
+  description String
+  banner String
+  created_at DateTime? @default(now())
+  updated_at DateTime? @default(now())
+  //fazendo a relação
+  category Category @relation(fields: [category_id], references: [id])
+
+  @@map("products")
+  category_id String
+  //isso aqui ta chamando a relação lá no model Item
+  items Item[]
+}
+
+model Order{
+  id String @id @default(uuid())
+  table Int
+  //defalut começa com status sempre falso, pois o pedido precisa ser concluido
+  status Boolean @default(false)
+  //default true pq o pedido tem que ser rascunho, ele vai ser concluido e n sera mais rascunho e logo aparecxera na cozinha
+  draft Boolean @default(true)
+  //? significa ser opcional
+  name String?
+  created_at DateTime? @default(now())
+  updated_at DateTime? @default(now())
+
+  @@map("orders")
+  //isso aqui ta chamando a relação lá no model Item
+  items Item[]
+}
+
+model Item{
+  id String @id @default(uuid())
+  //quantidade de products
+  amount Int
+  created_at DateTime? @default(now())
+  updated_at DateTime? @default(now())
+  //construindo a relação
+  order Order @relation(fields: [order_id], references: [id])
+  product Product @relation(fields: [product_id], references: [id])
+
+  @@map("items")
+  //esse vai ser o id do pedido da tabela order
+  order_id String
+  //esse vai ser o id do produto da tabela product
+  product_id String
+}
